@@ -6,13 +6,17 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-  <Using Include="System.Diagnostics" />
-  <Using Include="NumSharp" />
-</ItemGroup>
+    <Using Include="System.Collections" />
+    <Using Include="System.Diagnostics" />
+    <Using Include="Gym.Spaces" />
+    <Using Include="Gym.Render" />
+    <Using Include="NumSharp" />
+    <Using Include="SkiaSharp" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="NumSharp" Version="0.30.0" />
-    <PackageReference Include="GtkSharp" Version="3.24.24.*" />
+    <PackageReference Include="SkiaSharp" Version="2.88.0" />
   </ItemGroup>
 
 </Project>
