@@ -4,7 +4,7 @@ public abstract class Env : IEnv
 {
     protected SKSurface? SurfaceFrame;
     protected List<float[]>? RGBArray;
-    protected IEnvViewerSurface ViewerSurface;
+    protected Lazy<IEnvViewerSurface> ViewerSurface;
     protected IEnvToFloatArraySurface ToFloatArray;
 
     public bool UseRGBArray { get; }
@@ -13,10 +13,10 @@ public abstract class Env : IEnv
     public Space? ActionSpace { get; set; }
     public Space? ObservationSpace { get; set; }
 
-    public Env(bool useRGBArray = false, IEnvViewerSurface? viewerSurface = null, IEnvToFloatArraySurface? toFloatArray = null)
+    public Env(bool useRGBArray = false, EnvViewerSurfaceFactoryHandler? viewerSurfaceFactory = null, IEnvToFloatArraySurface? toFloatArray = null)
     {
         UseRGBArray = useRGBArray;
-        ViewerSurface = viewerSurface ?? NullEnvViewerSurface.Instance;
+        ViewerSurface = new Lazy<IEnvViewerSurface>(() => CreateViewerSurface(viewerSurfaceFactory ?? NullEnvViewerSurface.Factory));
         ToFloatArray = toFloatArray ?? NullEnvToFloatArraySurface.Instance;
     }
 
@@ -54,7 +54,7 @@ public abstract class Env : IEnv
     {
         var surface = RenderSurface();
 
-        ViewerSurface?.Render(surface);
+        ViewerSurface.Value.Render(surface);
 
         return null;
     }
@@ -66,7 +66,8 @@ public abstract class Env : IEnv
         ResetFrames();
         if (RGBArray != null)
             RGBArray = null;
-        ViewerSurface?.Close();
+        if (ViewerSurface.IsValueCreated)
+            ViewerSurface.Value.Close();
     }
 
     public abstract void Seed(int seed);
@@ -75,6 +76,7 @@ public abstract class Env : IEnv
 
     protected abstract NDArray ResetInternal();
     protected abstract (NDArray state, float reward, bool done, IDictionary? info) StepInternal(int action);
+    protected abstract IEnvViewerSurface CreateViewerSurface(EnvViewerSurfaceFactoryHandler handler);
     protected abstract SKSurface RenderSurface();
 
     protected void ResetFrames()
